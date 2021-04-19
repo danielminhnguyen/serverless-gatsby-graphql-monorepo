@@ -18,5 +18,5 @@
     "strictNullChecks": false
   },
   "exclude": ["node_modules", "src/**/*.test.ts"],
-  "include": ["src/**/*.ts", "enviroment.ts"]
+  "include": ["src/**/*.ts", "enviroment.ts", "src/server.js"]
 }

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { KohaModel } from "./models";
+import { KohaModel, TransactionsModel } from "./models";
 
 let database: mongoose.Connection;
 
@@ -30,6 +30,7 @@ export const connect = () => {
 
   return {
     KohaModel,
+    TransactionsModel,
   };
 };
 

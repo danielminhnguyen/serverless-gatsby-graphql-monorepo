@@ -8,9 +8,21 @@ export default gql`
   }
   type Query {
     kohaclub: [Kohaclub]
+    listTransactionByClubId(clubId: String): [Transactions]
+    listAllTransactions: [Transactions]
   }
   type Mutation {
-    payToClub(_id:ID!, Amount: Int!): Kohaclub
-    addClub(name: String!) : Kohaclub
+    payToClubById(_id: ID!, Amount: Int!): Kohaclub
+    payToClubById10(_id: ID!): Kohaclub
+    addClub(name: String!): Kohaclub
+  }
+
+  scalar DateTime
+
+  type Transactions {
+    _id: ID!
+    clubId: String
+    date: DateTime
+    amount: Int
   }
 `;

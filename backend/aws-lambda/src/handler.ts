@@ -1,8 +1,7 @@
 import { ApolloServer } from "apollo-server-lambda";
-import { getConnection } from "../database";
-import typeDefs from "../database/schema/koha";
-import resolvers from "../database/resolvers/kohaclub";
-import Kohaclub from "../database/models/koha";
+import { connect } from "./mongodb/database";
+import typeDefs from "./graphql/type-defs";
+import resolvers from "./graphql/resolvers";
 
 // serverless server on aws lambda - ap-southeast-2
 // as defined in serverless.yml
@@ -11,19 +10,15 @@ import Kohaclub from "../database/models/koha";
 // https://ap-southeast-2.console.aws.amazon.com/lambda/home?region=ap-southeast-2#/discover
 // for local development, please run npm start
 
-getConnection();
+// connect to mongdoDB
+connect();
 
-const apolloServer = new ApolloServer({
+const server = new ApolloServer({
   resolvers,
   typeDefs,
-  context: async () => {
-    const dbConn = await getConnection();
-    dbConn.model(Kohaclub);
-    return { dbConn };
-  },
-  // context: { Kohaclub },
   playground: true,
   introspection: true,
 });
 
-export const graphqlHandler = apolloServer.createHandler();
+
+export const graphqlHandler = server.createHandler();

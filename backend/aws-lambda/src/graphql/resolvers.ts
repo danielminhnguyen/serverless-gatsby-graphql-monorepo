@@ -34,7 +34,9 @@ export default {
       { clubId }: { clubId: ITrasactions["clubId"] }
     ): Promise<ITrasactions[]> => {
       try {
-        return await TransactionsModel.find({ clubId: clubId });
+        return await TransactionsModel.find({ clubId: clubId }).sort({
+          date: -1,
+        });
       } catch (error) {
         console.log("Query all clubs error: ", error);
         throw new ApolloError("Error Retreiving all clubs");
@@ -71,6 +73,12 @@ export default {
               // console.log(currentAmount)
               // console.log("deduct amount", deductAmount)
               await KohaModel.findByIdAndUpdate(_id, { Amount: newAmount });
+              const newID = mongoose.Types.ObjectId();
+              await TransactionsModel.create({
+                _id: newID,
+                clubId: _id,
+                amount: deductAmount,
+              });
             }
           }
         );
@@ -134,6 +142,19 @@ export default {
         const transaction = TransactionsModel.findOne({ _id: _id });
         await TransactionsModel.deleteOne({ _id: _id });
         return transaction;
+      } catch (error) {
+        console.log("Delete to transaction error: ", error);
+        throw new ApolloError("Error Delete transaction ");
+      }
+    },
+    deleteClub: async (
+      parent: any,
+      { _id }: { _id: IKoha["_id"] }
+    ): Promise<IKoha> => {
+      try {
+        const club = KohaModel.findOne({ _id: _id });
+        await KohaModel.deleteOne({ _id: _id });
+        return club;
       } catch (error) {
         console.log("Delete to transaction error: ", error);
         throw new ApolloError("Error Delete transaction ");

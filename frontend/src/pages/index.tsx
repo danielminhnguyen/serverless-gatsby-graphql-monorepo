@@ -21,8 +21,8 @@ const GET_CLUBS = gql`
 `;
 
 const PAY_CLUB_BY_ID = gql`
-  mutation PayToClubById($_id: ID!, $Amount: Number!) {
-    payToClubById(_id: $_id, Amount: $Amount) {
+  mutation PayToClub($_id: ID!, $amount: Int!) {
+    payToClubById(_id: $_id, Amount: $amount) {
       _id
       name
       Amount
@@ -52,6 +52,14 @@ const ADD_CLUB = gql`
 const DEL_TRNX = gql`
   mutation deleteTrnx($_id: ID!) {
     deleteTrnx(_id: $_id) {
+      _id
+    }
+  }
+`;
+
+const DEL_CLUB = gql`
+  mutation deleteClub($_id: ID!) {
+    deleteClub(_id: $_id) {
       _id
     }
   }
@@ -140,15 +148,24 @@ const useStyles = makeStyles((theme) => ({
   clubData: {
     overflowY: "auto",
   },
-  transactionDetails: {},
+  transactionDetails: {
+    "&>*": {
+      paddingLeft: 15,
+      paddingRight: 15,
+    },
+  },
   closeButton: {
     cursor: "pointer",
+    color: "#bbbbbb",
+    "&>:hover": {
+      color: "black",
+    },
   },
 }));
 
 export function dateFormat(timestamp) {
-  const date = new Date(timestamp);
-  const stringDate = date.toString();
+  const date: Date = new Date(timestamp);
+  const stringDate: string = date.toString();
   const time = date.toLocaleString("en-US", {
     hour: "numeric",
     minute: "numeric",
@@ -184,12 +201,18 @@ const Home: React.FC<PageProps> = () => {
     ],
   });
 
-  const [PayToClub] = useMutation(PAY_CLUB_BY_ID_TEST, {
+  const [delClub] = useMutation(DEL_CLUB, {
+    // refetch cache after add club
+    refetchQueries: [{ query: GET_CLUBS }],
+  });
+
+  const [PayToClub] = useMutation(PAY_CLUB_BY_ID, {
     // refetch cache after add club
     refetchQueries: [
       { query: GET_CLUBS },
       { query: LIST_TRX_BY_ID, variables: { clubId: activeClub } },
     ],
+    awaitRefetchQueries: true,
   });
 
   const [getTransactions, { data: TrnxData }] = useLazyQuery(LIST_TRX_BY_ID);
@@ -206,16 +229,22 @@ const Home: React.FC<PageProps> = () => {
   };
 
   const handlePayClubChange = (clubID) => (event) => {
-    console.log(PaymentInput);
+    console.log(event.target.value);
     setPaymentInput({ ...PaymentInput, [clubID]: event.target.value });
   };
 
   const handlePayClubClick = (id) => (event) => {
     event.preventDefault();
-    console.log(typeof id);
-    console.log(typeof PaymentInput[id]);
+    const clubID: string = id;
+    const amountPay: number = parseInt(PaymentInput[id]);
+    console.log("club type: ", typeof clubID, clubID);
+    console.log("amount type ", typeof amountPay, amountPay);
     console.log("Button Click");
-    PayToClub({ variables: { _id: id } });
+    if (clubID && amountPay) {
+      PayToClub({ variables: { _id: clubID, amount: amountPay } });
+    } else {
+      alert("Amount cannot be 0");
+    }
   };
 
   useEffect(() => {
@@ -232,6 +261,11 @@ const Home: React.FC<PageProps> = () => {
   const handleDeleteTransaction = (id) => (event) => {
     delTrnx({ variables: { _id: id } });
   };
+
+  const handleDeleteClub = (id) => (event) => {
+    delClub({ variables: { _id: id } });
+  };
+
   // const columns = [
   //   { field: "_id", headerName: "ID", width: 130 },
   //   { field: "amount", headerName: "Amount", width: 130 },
@@ -266,7 +300,7 @@ const Home: React.FC<PageProps> = () => {
                 >
                   {name}
                 </Grid>
-                <Grid item xs={3} className={classes.cellItem}>
+                <Grid item xs={2} className={classes.cellItem}>
                   {Amount}
                 </Grid>
                 <Grid item xs={3} className={classes.cellItem}>
@@ -275,7 +309,7 @@ const Home: React.FC<PageProps> = () => {
                     type="number"
                     variant="outlined"
                     InputProps={{
-                      inputProps: { min: 0, max: Amount, step: 1 },
+                      inputProps: { step: 10 },
                       classes: { input: classes.inputRoot },
                     }}
                     onChange={handlePayClubChange(id)}
@@ -293,6 +327,13 @@ const Home: React.FC<PageProps> = () => {
                   >
                     Mark Paid
                   </Button>
+                </Grid>
+                <Grid item xs={1} className={classes.cellItem}>
+                  <CloseIcon
+                    fontSize="small"
+                    onClick={handleDeleteClub(id)}
+                    className={classes.closeButton}
+                  />
                 </Grid>
               </>
             ))}
@@ -329,11 +370,11 @@ const Home: React.FC<PageProps> = () => {
             {activeClub !== `` ? (
               <>
                 <Grid container>
-                  <Grid item xs={4}>
-                    <Typography align="right">Amount</Typography>
-                  </Grid>
-                  <Grid item xs={8}>
+                  <Grid item xs={6}>
                     <Typography align="center">Date</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography align="center">Amount</Typography>
                   </Grid>
                 </Grid>
                 <Grid container className={classes.transactionDetails}>
@@ -348,14 +389,15 @@ const Home: React.FC<PageProps> = () => {
                   {TrnxData?.listTransactionByClubId?.map(
                     ({ _id, amount, date }) => (
                       <>
-                        <Grid item xs={5}>
-                          <div>{amount}</div>
-                        </Grid>
-                        <Grid item xs={5}>
+                        <Grid item xs={6}>
                           <div>{dateFormat(date)}</div>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Typography align="right">${amount}</Typography>
                         </Grid>
                         <Grid item xs={2}>
                           <CloseIcon
+                            fontSize="small"
                             onClick={handleDeleteTransaction(_id)}
                             className={classes.closeButton}
                           />

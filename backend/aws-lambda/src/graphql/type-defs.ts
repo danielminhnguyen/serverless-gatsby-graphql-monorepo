@@ -15,7 +15,8 @@ export default gql`
     payToClubById(_id: ID!, Amount: Int!): Kohaclub
     payToClubById10(_id: ID!): Kohaclub
     addClub(name: String!): Kohaclub
-    deleteTrnx(_id: ID): Transactions
+    deleteTrnx(_id: ID!): Transactions
+    deleteClub(_id: ID!): Kohaclub
   }
 
   scalar DateTime

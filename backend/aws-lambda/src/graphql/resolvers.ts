@@ -23,6 +23,7 @@ export default {
     ): Promise<ITrasactions[]> => {
       try {
         return await TransactionsModel.find();
+        TransactionsModel.aggregate();
       } catch (error) {
         console.log("Query all clubs error: ", error);
         throw new ApolloError("Error Retreiving all clubs");
@@ -96,7 +97,9 @@ export default {
               currentAmount = club.Amount;
               newAmount = currentAmount - 10;
               await KohaModel.findByIdAndUpdate(_id, { Amount: newAmount });
+              const newID = mongoose.Types.ObjectId();
               await TransactionsModel.create({
+                _id: newID,
                 clubId: _id,
                 amount: 10,
               });
@@ -121,6 +124,19 @@ export default {
       } catch (error) {
         console.log("Pay to club error: ", error);
         throw new ApolloError("Error Retreiving all clubs");
+      }
+    },
+    deleteTrnx: async (
+      parent: any,
+      { _id }: { _id: ITrasactions["_id"] }
+    ): Promise<ITrasactions> => {
+      try {
+        const transaction = TransactionsModel.findOne({ _id: _id });
+        await TransactionsModel.deleteOne({ _id: _id });
+        return transaction;
+      } catch (error) {
+        console.log("Delete to transaction error: ", error);
+        throw new ApolloError("Error Delete transaction ");
       }
     },
   },

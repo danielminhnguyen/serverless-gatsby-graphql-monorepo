@@ -161,7 +161,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/apollo-server-lambda/prod/1618895316015-2021-04-20T05:08:36.015Z/apollo-server-lambda.zip"
+          "S3Key": "serverless/apollo-server-lambda/prod/1618985180223-2021-04-21T06:06:20.223Z/apollo-server-lambda.zip"
         },
         "Handler": "src/handler.graphqlHandler",
         "Runtime": "nodejs12.x",
@@ -169,7 +169,9 @@
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
-          "Variables": {}
+          "Variables": {
+            "MONGO_URL": "mongodb+srv://gatsby:hBNWt650IxGpSDJI@cluster0.cqcjd.mongodb.net/gatsby?retryWrites=true&w=majority"
+          }
         },
         "Role": {
           "Fn::GetAtt": [
@@ -182,14 +184,14 @@
         "GraphqlLogGroup"
       ]
     },
-    "GraphqlLambdaVersionV6bDncdONXvmf7UAQWcWORDE3AmNNHhOddVtppuuw": {
+    "GraphqlLambdaVersionjgJkVkzyzp75gDQYPbzstxVZxHiuLksGsXHZufEt94": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GraphqlLambdaFunction"
         },
-        "CodeSha256": "bGaepJsUOYnv53GniMsQHre+MlpLgx2oue2fHVixu/A="
+        "CodeSha256": "aT74KvpJ8WMSgk3jP2go+nN7L8IsygcmxPR/wipgyC4="
       }
     },
     "ApiGatewayRestApi": {
@@ -350,7 +352,7 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1618895302759": {
+    "ApiGatewayDeployment1618985164430": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -411,7 +413,7 @@
     "GraphqlLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GraphqlLambdaVersionV6bDncdONXvmf7UAQWcWORDE3AmNNHhOddVtppuuw"
+        "Ref": "GraphqlLambdaVersionjgJkVkzyzp75gDQYPbzstxVZxHiuLksGsXHZufEt94"
       }
     },
     "ServiceEndpoint": {

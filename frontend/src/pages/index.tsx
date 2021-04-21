@@ -3,9 +3,10 @@ import React, { useEffect, useState } from "react";
 import { PageProps } from "gatsby";
 import gql from "graphql-tag";
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
-import { Button, Grid, TextField, Typography } from "@material-ui/core";
+import { Button, Grid, Paper, TextField, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { DataGrid } from "@material-ui/data-grid";
+// import { DataGrid } from "@material-ui/data-grid";
+import CloseIcon from "@material-ui/icons/Close";
 
 // queries fro graph ql
 
@@ -48,6 +49,14 @@ const ADD_CLUB = gql`
   }
 `;
 
+const DEL_TRNX = gql`
+  mutation deleteTrnx($_id: ID!) {
+    deleteTrnx(_id: $_id) {
+      _id
+    }
+  }
+`;
+
 const LIST_TRX_BY_ID = gql`
   query listTransactionByID($clubId: String!) {
     listTransactionByClubId(clubId: $clubId) {
@@ -64,8 +73,12 @@ const useStyles = makeStyles((theme) => ({
   flex: {
     display: `flex`,
   },
+  page: { padding: 100, display: `flex` },
   clubContainer: {
+    backgroundColor: "#ffe8e8",
+    padding: 20,
     maxWidth: 600,
+    marginRight: 30,
   },
   input: {
     width: 120,
@@ -84,8 +97,52 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
   },
+  clubName: {
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+  },
   inputRoot: {
     padding: 5,
+  },
+  transactionHeader: {
+    display: "flex",
+    width: 500,
+    height: 50,
+    padding: 10,
+    marginBottom: 30,
+    backgroundColor: "#ffe8e8",
+    justifyContent: "space-between",
+    alignItems: "center",
+    color: "#d44000",
+  },
+  transactions: {
+    backgroundColor: "#ffe8e8",
+    padding: 10,
+    width: 500,
+    height: 800,
+    overflowY: "auto",
+  },
+  title: {
+    color: "#d44000",
+  },
+  addGroup: {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    "&>*": {
+      marginLeft: 15,
+    },
+  },
+  button: {
+    color: "#d44000",
+  },
+  clubData: {
+    overflowY: "auto",
+  },
+  transactionDetails: {},
+  closeButton: {
+    cursor: "pointer",
   },
 }));
 
@@ -118,6 +175,13 @@ const Home: React.FC<PageProps> = () => {
   const [addclub] = useMutation(ADD_CLUB, {
     // refetch cache after add club
     refetchQueries: [{ query: GET_CLUBS }],
+  });
+
+  const [delTrnx] = useMutation(DEL_TRNX, {
+    // refetch cache after add club
+    refetchQueries: [
+      { query: LIST_TRX_BY_ID, variables: { clubId: activeClub } },
+    ],
   });
 
   const [PayToClub] = useMutation(PAY_CLUB_BY_ID_TEST, {
@@ -165,6 +229,9 @@ const Home: React.FC<PageProps> = () => {
     setactiveClubName(club.name);
   };
 
+  const handleDeleteTransaction = (id) => (event) => {
+    delTrnx({ variables: { _id: id } });
+  };
   // const columns = [
   //   { field: "_id", headerName: "ID", width: 130 },
   //   { field: "amount", headerName: "Amount", width: 130 },
@@ -173,9 +240,11 @@ const Home: React.FC<PageProps> = () => {
 
   return (
     <main>
-      <div className={classes.flex}>
-        <div className={classes.clubContainer}>
-          <Typography variant="h4">Koha</Typography>
+      <div className={classes.page}>
+        <Paper elevation={10} className={classes.clubContainer}>
+          <Typography className={classes.title} variant="h3">
+            Koha
+          </Typography>
           <Typography>Currently Owned</Typography>
           <Grid container>
             <Grid item xs={3}>
@@ -185,7 +254,7 @@ const Home: React.FC<PageProps> = () => {
               <Typography>Amount</Typography>
             </Grid>
           </Grid>
-          <Grid container>
+          <Grid container className={classes.clubData}>
             {clubData?.kohaclub?.map(({ name, Amount, _id: id }) => (
               <>
                 <Grid
@@ -193,7 +262,7 @@ const Home: React.FC<PageProps> = () => {
                   xs={3}
                   key={id}
                   onClick={handleClubClick(id)}
-                  className={classes.cellItem}
+                  className={classes.clubName}
                 >
                   {name}
                 </Grid>
@@ -220,6 +289,7 @@ const Home: React.FC<PageProps> = () => {
                     variant="outlined"
                     size="small"
                     onClick={handlePayClubClick(id)}
+                    className={classes.button}
                   >
                     Mark Paid
                   </Button>
@@ -227,37 +297,47 @@ const Home: React.FC<PageProps> = () => {
               </>
             ))}
           </Grid>
-          <div className={classes.flex}>
+          <div className={classes.addGroup}>
             <Typography>Add an Option</Typography>
             <TextField
               onChange={handleNewClubChange}
               value={newClub}
               variant="outlined"
               placeholder="Club Name"
+              InputProps={{
+                classes: { input: classes.inputRoot },
+              }}
             >
               Club Name
             </TextField>
-            <Button variant="contained" onClick={handleNewClubClick}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleNewClubClick}
+            >
               Add Koha Group
             </Button>
           </div>
-        </div>
+        </Paper>
 
         <div className={classes.transactionContainer}>
-          <div>Transaction for Club </div>{" "}
-          <Typography variant="h4">{activeClubName}</Typography>
-          {activeClub !== `` ? (
-            <>
-              <Grid container>
-                <Grid item xs={4}>
-                  <Typography align="right">Amount</Typography>
+          <Paper elevation={10} className={classes.transactionHeader}>
+            <Typography variant="h5">Transaction for Club </Typography>
+            <Typography variant="h4">{activeClubName}</Typography>
+          </Paper>
+          <Paper elevation={10} className={classes.transactions}>
+            {activeClub !== `` ? (
+              <>
+                <Grid container>
+                  <Grid item xs={4}>
+                    <Typography align="right">Amount</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography align="center">Date</Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={8}>
-                  <Typography align="center">Date</Typography>
-                </Grid>
-              </Grid>
-              <Grid container>
-                {/* {TrnxData && TrnxData.listTransactionByClubId ? (
+                <Grid container className={classes.transactionDetails}>
+                  {/* {TrnxData && TrnxData.listTransactionByClubId ? (
                   <DataGrid
                     columns={columns}
                     rows={TrnxData.listTransactionByClubId}
@@ -265,21 +345,30 @@ const Home: React.FC<PageProps> = () => {
                 ) : (
                   ""
                 )} */}
-                {TrnxData?.listTransactionByClubId?.map(({ amount, date }) => (
-                  <>
-                    <Grid item xs={6}>
-                      <div>{amount}</div>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <div>{dateFormat(date)}</div>
-                    </Grid>
-                  </>
-                ))}
-              </Grid>
-            </>
-          ) : (
-            <div>Click on club name on the left to view transactions</div>
-          )}
+                  {TrnxData?.listTransactionByClubId?.map(
+                    ({ _id, amount, date }) => (
+                      <>
+                        <Grid item xs={5}>
+                          <div>{amount}</div>
+                        </Grid>
+                        <Grid item xs={5}>
+                          <div>{dateFormat(date)}</div>
+                        </Grid>
+                        <Grid item xs={2}>
+                          <CloseIcon
+                            onClick={handleDeleteTransaction(_id)}
+                            className={classes.closeButton}
+                          />
+                        </Grid>
+                      </>
+                    )
+                  )}
+                </Grid>
+              </>
+            ) : (
+              <div>Click on club name on the left to view transactions</div>
+            )}
+          </Paper>
         </div>
       </div>
     </main>

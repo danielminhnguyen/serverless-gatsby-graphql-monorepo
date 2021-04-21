@@ -8,9 +8,9 @@ export interface IKoha extends mongoose.Document {
 }
 
 const kohaclubSchema: mongoose.Schema = new mongoose.Schema({
-  _id: { type: mongoose.SchemaTypes.ObjectId, required: true },
-  name: { type: mongoose.SchemaTypes.String, required: true },
-  Amount: { type: mongoose.SchemaTypes.Number, required: true },
+  _id: { type: mongoose.SchemaTypes.ObjectId },
+  name: { type: mongoose.SchemaTypes.String },
+  Amount: { type: mongoose.SchemaTypes.Number },
 });
 
 // link to existing collection on mongodb
@@ -29,7 +29,7 @@ export interface ITrasactions extends mongoose.Document {
 }
 
 const TransactionsSchema: mongoose.Schema = new mongoose.Schema({
-  _id: { type: mongoose.SchemaTypes.ObjectId, required: true },
+  _id: { type: mongoose.SchemaTypes.ObjectId },
   clubId: { type: mongoose.SchemaTypes.String },
   date: { type: mongoose.SchemaTypes.Date, default: Date.now },
   amount: { type: mongoose.SchemaTypes.Number },

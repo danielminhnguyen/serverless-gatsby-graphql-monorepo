@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
+import { enviroment } from "../../enviroment";
 import { KohaModel, TransactionsModel } from "./models";
 
 let database: mongoose.Connection;
 
 export const connect = () => {
-  const uri =
-    "mongodb+srv://gatsby:hBNWt650IxGpSDJI@cluster0.cqcjd.mongodb.net/gatsby?retryWrites=true&w=majority";
+  const uri = enviroment.mongoURL;
 
   if (database) {
     return;
